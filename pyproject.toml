@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "url-shortener"
+version = "0.1.0"
+description = "A simple api for creating short links"
+authors = ["Roman Kuzianov"]
+readme = "README.md"
+packages = [{include = "url_shortener"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.94.0"
+uvicorn = {extras = ["standard"], version = "^0.21.0"}
+sqlalchemy = "^2.0.5.post1"
+asyncpg = "^0.27.0"
+alembic = "^1.10.2"
+psycopg2-binary = "^2.9.5"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
