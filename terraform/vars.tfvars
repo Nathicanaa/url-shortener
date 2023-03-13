@@ -1,5 +1,0 @@
-project_id    = "playground-377722"
-region        = "europe-west1"
-instance_name = "url-shortener"
-postgres_user = "postgres"
-postgres_password = "shortener"
