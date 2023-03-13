@@ -1,5 +1,6 @@
-import pydantic
 import datetime
+
+import pydantic
 
 
 class UrlTarget(pydantic.BaseModel):
@@ -13,3 +14,4 @@ class UrlShort(pydantic.BaseModel):
 class UrlResponse(UrlTarget, UrlShort):
     url_hash: str
     created_at: datetime.datetime
+    clicks: int
