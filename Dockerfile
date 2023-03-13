@@ -19,6 +19,5 @@ COPY --from=builder .venv/ .venv/
 COPY alembic.ini ./
 COPY alembic alembic
 COPY src src
-ARG PORT
-EXPOSE $PORT
+
 CMD python -m alembic upgrade head && python -m uvicorn src.main:app --host 0.0.0.0 --port $PORT
