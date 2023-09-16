@@ -2,6 +2,7 @@ import datetime
 import json
 import typing
 
+import sqids
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,19 +10,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import src.logger
 
 logger = src.logger.get_logger(__name__)
+hasher: sqids.Sqids = sqids.Sqids()
 
 
-class Base(orm.DeclarativeBase):  # type: ignore
+class Base(orm.DeclarativeBase):
     pass
 
 
 class Url(Base):
     __tablename__ = "urls"
 
-    url_hash: orm.Mapped[str] = orm.mapped_column(
-        sa.String(10), primary_key=True
+    id_seq = sa.Sequence(
+        "id_seq",
+        metadata=Base.metadata,
+        start=1,
+        increment=1,
+        data_type=sa.BIGINT,
     )
-    short_url: orm.Mapped[str] = orm.mapped_column(nullable=False)
+    url_hash: orm.Mapped[str] = orm.mapped_column(
+        sa.String(20), primary_key=True
+    )
     target_url: orm.Mapped[str] = orm.mapped_column(nullable=False)
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(
         default=datetime.datetime.utcnow
@@ -32,21 +40,15 @@ class Url(Base):
     async def insert_url(
         cls,
         session: AsyncSession,
-        url_hash: str,
-        short_url: str,
         target_url: str,
-        created_at: datetime.datetime,
-    ) -> str:
+    ) -> "Url":
         async with session.begin():
-            session.add(
-                cls(
-                    url_hash=url_hash,
-                    short_url=short_url,
-                    target_url=target_url,
-                    created_at=created_at,
-                )
+            next_val = await session.execute(Url.id_seq)
+            url = cls(
+                target_url=target_url, url_hash=hasher.encode([next_val])
             )
-        return url_hash
+            session.add(url)
+        return url
 
     @classmethod
     async def get_by_hash(
@@ -55,14 +57,14 @@ class Url(Base):
         async with session.begin():
             stmt = sa.select(cls).where(cls.url_hash == url_hash)
             result = await session.execute(stmt)
-        result = result.scalars().one_or_none()
+        result = result.scalars().one_or_none()  # type: ignore
         return result  # type: ignore
 
     @classmethod
     async def delete_url(cls, session: AsyncSession, url: "Url") -> str:
         async with session.begin():
             await session.delete(url)
-        return url.short_url  # type: ignore
+        return url.url_hash
 
     @classmethod
     async def update_clicks(cls, session: AsyncSession, url: "Url") -> str:
@@ -73,4 +75,4 @@ class Url(Base):
                 f"Clicks increased by 1 for url with hash {url.url_hash}"
             )
         )
-        return url.url_hash  # type: ignore
+        return url.url_hash

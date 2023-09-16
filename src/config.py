@@ -2,7 +2,7 @@ import dotenv
 import pydantic
 
 
-class Config(pydantic.BaseSettings):
+class Config(pydantic.BaseSettings):  # type: ignore
     psql_name: str
     psql_password: str
     psql_host: str
