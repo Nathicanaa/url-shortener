@@ -58,4 +58,3 @@ def downgrade() -> None:
         )
     )
     op.drop_table("urls")
-    # ### end Alembic commands ###
