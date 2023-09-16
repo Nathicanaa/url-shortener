@@ -19,5 +19,5 @@ async def redirect_to_full_url(
     )
     background_tasks.add_task(models.Url.update_clicks, session, url_exists)
     return fastapi.responses.RedirectResponse(
-        url=url_exists.target_url, status_code=302
+        url=url_exists.target_url, status_code=307
     )
